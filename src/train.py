@@ -4,17 +4,30 @@ ML Pipeline: Train/Val/Test Split, Missing Value Audit & Imputation
 Uses SimpleImputer (median / most_frequent) for robustness.
 Saves preprocessed data and imputation parameters for later use.
 """
+"""
+ML Pipeline: Train/Val/Test Split, Missing Value Imputation, Encoding, Scaling,
+Two Models (Linear Regression & Random Forest), Comparison, and Saving Best Model.
+All transformers fit on train only – no leakage.
+"""
 
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import StandardScaler, OrdinalEncoder, OneHotEncoder
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.linear_model import LinearRegression
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_squared_error, r2_score
 import pickle
 import os
 
 # Paths
 DATA_PATH = 'data/train.csv'
 PROCESSED_DIR = 'processed'
+MODELS_DIR = 'models'
+os.makedirs(MODELS_DIR, exist_ok=True)
 os.makedirs(PROCESSED_DIR, exist_ok=True)
 
 # ------------------------------------------------------------
@@ -160,3 +173,84 @@ with open(f'{PROCESSED_DIR}/imputation_params.pkl', 'wb') as f:
     pickle.dump(imputers, f)
 
 print(f"\nSaved preprocessed data and imputation parameters to '{PROCESSED_DIR}/' folder.")
+
+# Step 3: Encoding, Scaling, and Model Training
+# ------------------------------------------------------------
+# Reload preprocessed data (already in memory, but we use the imputed DataFrames)
+X_train = X_train_imp
+X_val = X_val_imp
+X_test = X_test_imp
+
+# Define column types for preprocessing
+numeric_features = ['LotArea', 'BedroomAbvGr', 'FullBath', 'HalfBath',
+                    'OverallQual', 'YearBuilt', 'GarageCars', 'TotRmsAbvGrd']
+ordinal_features = ['KitchenQual']
+nominal_features = ['Neighborhood']
+
+# Ordinal encoding categories (low to high)
+kitchen_categories = [['Po', 'Fa', 'TA', 'Gd', 'Ex']]
+
+# Preprocessing pipelines
+numeric_transformer = StandardScaler()
+ordinal_transformer = OrdinalEncoder(categories=kitchen_categories)
+nominal_transformer = OneHotEncoder(handle_unknown='ignore', sparse_output=False)
+
+# Combine into a ColumnTransformer
+preprocessor = ColumnTransformer(
+    transformers=[
+        ('num', numeric_transformer, numeric_features),
+        ('ord', ordinal_transformer, ordinal_features),
+        ('nom', nominal_transformer, nominal_features)
+    ])
+
+# Define two models with their pipelines
+models = {
+    'Linear Regression': Pipeline(steps=[
+        ('preprocessor', preprocessor),
+        ('regressor', LinearRegression())
+    ]),
+    'Random Forest': Pipeline(steps=[
+        ('preprocessor', preprocessor),
+        ('regressor', RandomForestRegressor(n_estimators=100, random_state=42))
+    ])
+}
+# Train and evaluate on validation set
+results = {}
+best_model = None
+best_r2 = -np.inf
+
+print("\n" + "="*50)
+print("Model Training and Validation")
+print("="*50)
+
+for name, pipeline in models.items():
+    pipeline.fit(X_train, y_train)
+    y_pred_val = pipeline.predict(X_val)
+    rmse = np.sqrt(mean_squared_error(y_val, y_pred_val))
+    r2 = r2_score(y_val, y_pred_val)
+    results[name] = {'RMSE': rmse, 'R²': r2}
+    print(f"{name:20} | RMSE: {rmse:,.0f} | R²: {r2:.4f}")
+    if r2 > best_r2:
+        best_r2 = r2
+        best_model = pipeline
+
+print("\n" + "="*50)
+print(f"Best model: {best_model.named_steps['regressor'].__class__.__name__}")
+print(f"Best validation R²: {best_r2:.4f}")
+print("="*50)
+
+# Save the best model
+with open(f'{MODELS_DIR}/best_model.pkl', 'wb') as f:
+    pickle.dump(best_model, f)
+print(f"Best model saved to {MODELS_DIR}/best_model.pkl")
+
+# Final evaluation on test set (only once)
+y_pred_test = best_model.predict(X_test)
+test_rmse = np.sqrt(mean_squared_error(y_test, y_pred_test))
+test_r2 = r2_score(y_test, y_pred_test)
+print("\n" + "="*50)
+print("FINAL TEST EVALUATION (only once)")
+print("="*50)
+print(f"Test RMSE: {test_rmse:,.0f}")
+print(f"Test R²:  {test_r2:.4f}")
+print("="*50)
