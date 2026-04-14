@@ -7,3 +7,4 @@ data/
 notebooks/.ipynb_checkpoints/
 *.ipynb_checkpoints/
 processed/*.csv
+archive.zip

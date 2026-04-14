@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-"""Data cleaning: split, missing value imputation, save preprocessed data."""
+"""Data cleaning: split, missing value imputation, save preprocessed data.
+Uses the full Ames housing dataset (2930 rows) from local CSV.
+"""
 
 import pandas as pd
 import numpy as np
@@ -8,17 +10,33 @@ from sklearn.impute import SimpleImputer
 import pickle
 import os
 
-# Paths
-DATA_PATH = 'data/train.csv'
 PROCESSED_DIR = 'processed'
 os.makedirs(PROCESSED_DIR, exist_ok=True)
 
 # ------------------------------------------------------------
 # 1. Load data & select features
 # ------------------------------------------------------------
-print("Loading data...")
-df = pd.read_csv(DATA_PATH)
+print("Loading full Ames dataset from local CSV...")
+df = pd.read_csv('data/AmesHousing.csv')
 print(f"Full dataset shape: {df.shape}")
+
+# Rename columns to match our feature names (if the CSV uses spaces)
+rename_map = {
+    'Lot Area': 'LotArea',
+    'Bedroom AbvGr': 'BedroomAbvGr',
+    'Full Bath': 'FullBath',
+    'Half Bath': 'HalfBath',
+    'Neighborhood': 'Neighborhood',
+    'Overall Qual': 'OverallQual',
+    'Year Built': 'YearBuilt',
+    'Garage Cars': 'GarageCars',
+    'Kitchen Qual': 'KitchenQual',
+    'TotRms AbvGrd': 'TotRmsAbvGrd',
+    'SalePrice': 'SalePrice'
+}
+# Only rename columns that exist
+existing_rename = {k: v for k, v in rename_map.items() if k in df.columns}
+df.rename(columns=existing_rename, inplace=True)
 
 features = [
     'LotArea', 'BedroomAbvGr', 'FullBath', 'HalfBath',
@@ -99,7 +117,7 @@ def apply_imputation(X_tr, X_v, X_te,
             X_v[col] = imp.transform(X_v[[col]]).ravel()
             X_te[col] = imp.transform(X_te[[col]]).ravel()
 
-    return X_tr, X_v, X_te   # IMPORTANT: must return the three DataFrames
+    return X_tr, X_v, X_te
 
 # Apply imputation
 X_train_imp, X_val_imp, X_test_imp = apply_imputation(
