@@ -1,6 +1,13 @@
 import streamlit as st
 import requests
 
+USE_LIVE_API = False   # change to True when deploying
+
+if USE_LIVE_API:
+    API_BASE = "https://ai-real-estate-agent-1vr4.onrender.com"
+else:
+    API_BASE = "http://localhost:8000"
+
 st.set_page_config(page_title="AI Real Estate Agent", layout="centered")
 st.title("🏠 AI Real Estate Agent")
 
@@ -19,7 +26,7 @@ if st.button("Extract Features"):
     with st.spinner("Extracting features..."):
         try:
             resp = requests.post(
-                "http://localhost:8000/extract",
+                f"{API_BASE}/extract",
                 params={"query": query, "prompt_version": prompt_version}
             )
             if resp.status_code == 200:
@@ -57,7 +64,7 @@ if st.session_state.extracted_features:
         with st.spinner("Predicting..."):
             try:
                 resp = requests.post(
-                    "http://localhost:8000/predict",
+                    f"{API_BASE}/predict",
                     params={"query": query, "prompt_version": prompt_version},
                     json=complete_features
                 )

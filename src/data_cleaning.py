@@ -130,6 +130,16 @@ print(f"Train: {X_train_imp.isnull().sum().sum()}")
 print(f"Val:   {X_val_imp.isnull().sum().sum()}")
 print(f"Test:  {X_test_imp.isnull().sum().sum()}")
 
+# Save training target statistics for API (median, min, max)
+stats = {
+    'median_price': y_train.median(),
+    'min_price': y_train.min(),
+    'max_price': y_train.max()
+}
+with open(f'{PROCESSED_DIR}/stats.pkl', 'wb') as f:
+    pickle.dump(stats, f)
+print("Saved training target statistics to stats.pkl")
+
 # ------------------------------------------------------------
 # 6. Save preprocessed data
 # ------------------------------------------------------------

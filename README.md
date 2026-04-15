@@ -42,6 +42,19 @@ The full EDA, ML pipeline, and prompt versioning experiment are also available a
  
  Note: The Colab notebook uses the OpenML version of the dataset (with underscore column names) and a slightly different ordinal encoding for KitchenQual. The local pipeline uses a CSV file with camelCase names. Both produce similar results (R² ~0.82–0.83).
 
+## 🐳 Docker Deployment
+
+The FastAPI app is containerized using Docker and deployed on Render.
+
+- **Dockerfile**: [link to Dockerfile](Dockerfile)
+- **Live API URL**: [https://ai-real-estate-agent-1vr4.onrender.com](https://ai-real-estate-agent-1vr4.onrender.com)
+- **Build command**: `docker build -t ai-real-estate-agent .`
+- **Run command**: `docker run -p 8000:8000 --env-file .env ai-real-estate-agent`
+
+The deployment is automatically triggered on each push to the `feature/ml-pipeline` branch. The service runs the container with the environment variable `GROQ_API_KEY` set for LLM calls.
+
+
+
 text
 
 ---
