@@ -1,7 +1,7 @@
 import streamlit as st
 import requests
 
-USE_LIVE_API = False   # change to True when deploying
+USE_LIVE_API = True   # change to True when deploying
 
 if USE_LIVE_API:
     API_BASE = "https://ai-real-estate-agent-1vr4.onrender.com"
