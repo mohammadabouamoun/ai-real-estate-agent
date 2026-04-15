@@ -11,7 +11,7 @@ app = FastAPI(title="AI Real Estate Agent")
 # Load model and imputation parameters at startup
 MODEL_PATH = 'models/best_model.pkl'
 IMPUTER_PATH = 'processed/imputation_params.pkl'
-Y_TRAIN_PATH = 'processed/y_train.csv'
+# Y_TRAIN_PATH = 'processed/y_train.csv'
 
 if not os.path.exists(MODEL_PATH):
     raise RuntimeError(f"Model not found at {MODEL_PATH}")
@@ -24,10 +24,15 @@ with open(MODEL_PATH, 'rb') as f:
 with open(IMPUTER_PATH, 'rb') as f:
     imputers = pickle.load(f)
 
-train_prices = pd.read_csv(Y_TRAIN_PATH).squeeze()
-median_price = train_prices.median()
-price_min = train_prices.min()
-price_max = train_prices.max()
+# Load precomputed statistics (median, min, max) from pickle file
+STATS_PATH = 'processed/stats.pkl'
+if not os.path.exists(STATS_PATH):
+    raise RuntimeError(f"Statistics file not found at {STATS_PATH}. Run data_cleaning.py first.")
+with open(STATS_PATH, 'rb') as f:
+    stats = pickle.load(f)
+median_price = stats['median_price']
+price_min = stats['min_price']
+price_max = stats['max_price']
 
 # List of all feature names expected by the model
 ALL_FEATURES = [
