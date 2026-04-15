@@ -14,6 +14,12 @@ class ExtractedFeatures(BaseModel):
     KitchenQual: Optional[str] = None
     TotRmsAbvGrd: Optional[int] = None
 
+    
+class ExtractionResult(BaseModel):
+    """Result of Stage 1: extracted features + list of missing fields."""
+    extracted: ExtractedFeatures
+    missing_fields: List[str]
+
 class PredictionResponse(BaseModel):
     """Final API response."""
     query: str

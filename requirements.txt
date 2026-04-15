@@ -6,4 +6,5 @@ uvicorn
 pydantic
 httpx
 requests
-streamlit
+streamlitgroq
+python-dotenv
