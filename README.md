@@ -3,6 +3,33 @@
 An end-to-end AI system that extracts property features from natural language, predicts house prices using a trained ML model, and explains the prediction in plain English. Built with **FastAPI**, **Streamlit**, **Docker**, and **Groq LLM API** (or local Ollama).  
 
 
+## 📓 Colab Notebook
+
+The full EDA, ML pipeline, and prompt versioning experiment are also available as a Google Colab notebook.  
+**Link**: [AI Real Estate Agent – Colab Notebook](https://colab.research.google.com/drive/1NvLJ-76SyOG1bW7EgQPG2JcUqW6HY51S?usp=sharing)
+ 
+ Note: The Colab notebook uses the OpenML version of the dataset (with underscore column names) and a slightly different ordinal encoding for KitchenQual. The local pipeline uses a CSV file with camelCase names. Both produce similar results (R² ~0.82–0.83).
+
+## 🐳 Docker Deployment
+
+The FastAPI app is containerized using Docker and deployed on Render.
+
+- **Dockerfile**: [link to Dockerfile](Dockerfile)
+- **Live API URL**: [https://ai-real-estate-agent-1vr4.onrender.com](https://ai-real-estate-agent-1vr4.onrender.com)
+- **Build command**: `docker build -t ai-real-estate-agent .`
+- **Run command**: `docker run -p 8000:8000 --env-file .env ai-real-estate-agent`
+
+The deployment is automatically triggered on each push to the `feature/ml-pipeline` branch. The service runs the container with the environment variable `GROQ_API_KEY` set for LLM calls.
+
+
+## 🖥️ Streamlit UI (Live Dashboard)
+
+The user interface is deployed on **Streamlit Cloud** and connects to the live FastAPI backend.
+
+- **Live UI URL**: [https://your-app-name.streamlit.app](https://your-app-name.streamlit.app) *(replace with your actual URL)*
+- **Local UI**: Run `streamlit run src/ui.py` after starting the FastAPI server locally.
+
+
 **Key features**:
 - Two‑stage LLM prompt chain:  
   - Stage 1: Extract structured features from a user’s description.  
@@ -34,24 +61,6 @@ ai-real-estate-agent/
 ├── .env.example # Template for GROQ_API_KEY
 ├── experiment_prompts.py # Prompt versioning test script
 └── README.md # This file
-
-## 📓 Colab Notebook
-
-The full EDA, ML pipeline, and prompt versioning experiment are also available as a Google Colab notebook.  
-**Link**: [AI Real Estate Agent – Colab Notebook](https://colab.research.google.com/drive/1NvLJ-76SyOG1bW7EgQPG2JcUqW6HY51S?usp=sharing)
- 
- Note: The Colab notebook uses the OpenML version of the dataset (with underscore column names) and a slightly different ordinal encoding for KitchenQual. The local pipeline uses a CSV file with camelCase names. Both produce similar results (R² ~0.82–0.83).
-
-## 🐳 Docker Deployment
-
-The FastAPI app is containerized using Docker and deployed on Render.
-
-- **Dockerfile**: [link to Dockerfile](Dockerfile)
-- **Live API URL**: [https://ai-real-estate-agent-1vr4.onrender.com](https://ai-real-estate-agent-1vr4.onrender.com)
-- **Build command**: `docker build -t ai-real-estate-agent .`
-- **Run command**: `docker run -p 8000:8000 --env-file .env ai-real-estate-agent`
-
-The deployment is automatically triggered on each push to the `feature/ml-pipeline` branch. The service runs the container with the environment variable `GROQ_API_KEY` set for LLM calls.
 
 
 

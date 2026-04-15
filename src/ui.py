@@ -53,7 +53,7 @@ if st.session_state.extracted_features:
     
     # Create input widgets for each missing field (no defaults, min_value=0 for numeric)
     for field in st.session_state.missing_fields:
-        if field in ["LotArea", "GarageCars", "BedroomAbvGr", "FullBath", "HalfBath", "OverallQual", "TotRmsAbvGrd"]:
+        if field in ["LotArea", "GarageCars", "BedroomAbvGr", "FullBath", "HalfBath", "TotRmsAbvGrd"]:
             # Numeric fields: prevent negative numbers
             val = st.number_input(f"{field}", value=None, step=1, min_value=0, placeholder=f"Enter {field}")
             filled_features[field] = val
@@ -66,6 +66,11 @@ if st.session_state.extracted_features:
         elif field ==  "YearBuilt" :
             val = st.number_input(f"{field}", value=None, step=1, min_value=1872, max_value=2010, placeholder=f"Enter {field}")
             filled_features[field] = val
+        elif field ==  "OverallQual" :
+            val = st.number_input(f"{field}", value=None, step=1, min_value=1, max_value=10, placeholder=f"Enter {field}")
+            filled_features[field] = val
+
+           
     # Prediction button – only works when all missing fields are filled
     if st.button("Get Price Prediction"):
         # Check that all missing fields have been filled
